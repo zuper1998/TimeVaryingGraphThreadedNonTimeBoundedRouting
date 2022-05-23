@@ -23,7 +23,7 @@ public:
 	bool operator ==(Edge const&)const;
 	friend std::ostream& operator << (std::ostream& os, Edge const &e );
 
-	static bool compareVis(VisibilityInterval i1, VisibilityInterval i2) {return i1.getThrougput() < i2.getThrougput(); }
+	static bool compareVis(VisibilityInterval const& i1, VisibilityInterval const& i2) {return i1.getThrougput() < i2.getThrougput(); }
 	/// <summary>
 	/// Used to get the target value
 	/// </summary>

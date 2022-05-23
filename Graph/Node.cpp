@@ -1,8 +1,10 @@
 #include "Node.h"
 
-Node::Node(std::string _name)
+#include <utility>
+
+Node::Node(std::string _name) : name(std::move(_name))
 {
-	name = _name;
+
 }
 
 std::ostream& operator<<(std::ostream& os, Node n)

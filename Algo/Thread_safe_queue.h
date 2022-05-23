@@ -16,7 +16,7 @@ class Thread_safe_queue {
     mutable std::mutex mutex_;
     std::condition_variable cond_;
 public:
-    Thread_safe_queue() =default;
+
 
     void push(T const& t){
         std::unique_lock l(mutex_);
@@ -37,12 +37,20 @@ public:
 
     T pop(){
         std::unique_lock l(mutex_);
+        //Long time
         cond_.wait(l,[this]{return !queue_.empty();});
-        auto ret = queue_.front();
+        T ret = queue_.front();
         queue_.pop();
         return ret;
     }
 
+    void GenDone(){
+        //This is a hack
+        for(int i = 0 ; i < 50; i++){
+            queue_.push(T());
+        }
+        cond_.notify_all();
+    }
 
     [[nodiscard]]bool empty() const {
         return queue_.empty();

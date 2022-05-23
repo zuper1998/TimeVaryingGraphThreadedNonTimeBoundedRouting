@@ -1,6 +1,6 @@
 #include "Path.h"
 
-std::ostream& operator<<( std::ostream& os, Path p)
+std::ostream& operator<<( std::ostream& os, Path const& p)
 {
 	for (Edge *e : p.edges) {
 		os << *e->start << " --> " << *e->end << " -->" ;
@@ -9,7 +9,7 @@ std::ostream& operator<<( std::ostream& os, Path p)
 	return os;
 }
 
-void Path::RemoveVisIntervals(IntervalPath p,double tr)
+void Path::RemoveVisIntervals(IntervalPath const& p,double tr)
 {
 	//We assume that the edges are in good order 
 

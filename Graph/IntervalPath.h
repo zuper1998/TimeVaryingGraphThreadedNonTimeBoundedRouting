@@ -20,13 +20,11 @@ public:
 		curMax = curMin = 0;
 	}
 
-	IntervalPath(VisibilityInterval vi) {
-		curMax = vi.end;
-		curMin = vi.start;
+	explicit IntervalPath(const VisibilityInterval& vi) : curMax(vi.end), curMin(vi.start) {
 		addPath(vi);
 	}
 
-	IntervalPath(IntervalPath const& parent, VisibilityInterval vi) {
+	explicit IntervalPath(IntervalPath const& parent, VisibilityInterval const& vi) {
 		*this = parent;
 		addPath(vi);
 	}
@@ -42,7 +40,7 @@ public:
 	/// </summary>
 	/// <param name="vi"></param>
 	/// <returns></returns>
-	bool canBeAdded(VisibilityInterval vi) {
+	[[nodiscard]] bool canBeAdded(VisibilityInterval vi) const {
 		TVG_TIME avg = getAvarage(curMin, curMax);
 		//The tester interval
 		double startTime = std::max( avg.getTime() - DefValues::maxWindow / 2,0.0); 

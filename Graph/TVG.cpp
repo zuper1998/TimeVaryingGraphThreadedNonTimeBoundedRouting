@@ -1,6 +1,5 @@
 #include "TVG.h"
 
-#include <utility>
 #include "../Algo/CalcBestPath.h"
 std::vector<double> parseFloat(std::string const& basicString);
 DataHolder getDataFromLine(const std::string& l);

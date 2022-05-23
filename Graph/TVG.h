@@ -59,7 +59,7 @@ public:
 	thread_pool* pool;
 
 
-	TVG(const std::string& f) {
+	explicit TVG(const std::string& f) {
 		try {
 			readFromFile(f);
 		}

@@ -14,19 +14,17 @@ public:
 	TVG_TIME() {
 		time = -1;
 	}
-	bool operator < (TVG_TIME& outer)const{
+	bool operator < (TVG_TIME const& outer)const{
 		return time < outer.time;
 	}
-	bool operator > (TVG_TIME&  outer)const {
+	bool operator > (TVG_TIME  const& outer)const {
 		return time > outer.time;
 	}
-	bool operator == (TVG_TIME&  outer)const {
+	bool operator == (TVG_TIME const& outer)const {
 		return time == outer.time;
 	}
 
-	bool operator==(const TVG_TIME& outer) const {
-		return time == outer.time;
-	}
+
 	[[nodiscard]] double getTime() const { return time; }
 
 	friend TVG_TIME getAvarage(TVG_TIME t1, TVG_TIME t2) {

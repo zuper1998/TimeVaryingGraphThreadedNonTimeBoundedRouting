@@ -1,5 +1,6 @@
 #pragma once
 
+#include <utility>
 #include <vector>
 #include <numeric>
 #include "../DefValues.h"
@@ -14,13 +15,9 @@ class VisibilityInterval
 {
 	double througput = -1;
 public:
-	VisibilityInterval(TVG_TIME _start, TVG_TIME _end, std::vector<double>t): start(_start), end(_end) {
-		
-		transmittance = t;
-		througput = 0;
-		for (auto& d : transmittance) {
-			througput += d * DefValues::EntangledRate;
-		}
+	VisibilityInterval(TVG_TIME _start, TVG_TIME _end, std::vector<double> t): start(_start), end(_end), transmittance(std::move(t)) {
+
+        througput =  std::accumulate(transmittance.begin(),transmittance.end(),0.0);
 
 	}
 	

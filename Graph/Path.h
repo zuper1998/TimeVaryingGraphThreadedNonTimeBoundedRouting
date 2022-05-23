@@ -58,7 +58,7 @@ public:
 		return getLastNode()->getEdges();
 	}
 	
-	void RemoveVisIntervals(IntervalPath,double);
+	void RemoveVisIntervals(IntervalPath const&,double);
 
 	friend std::ostream& operator << (std::ostream& os, Path p );
 };

@@ -36,7 +36,7 @@ Edge::Edge(Node* n1, Node* n2)
 /// <param name="vi"></param>
 void Edge::addVisInterval(VisibilityInterval vi)
 {
-	if (std::none_of(vis_intervals.begin(), vis_intervals.end(), [&] (VisibilityInterval outer) {return outer == vi;}))
+	if (std::none_of(vis_intervals.begin(), vis_intervals.end(), [&] (const VisibilityInterval& outer) {return outer == vi;}))
 	vis_intervals.push_back(vi);
 }
 
