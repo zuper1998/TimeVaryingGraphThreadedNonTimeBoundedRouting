@@ -122,6 +122,8 @@ Edge* TVG::findEdge(Edge* e)
 }
 
 
+
+
 /// <summary>
 /// Procuder
 /// </summary>
@@ -132,7 +134,7 @@ Edge* TVG::findEdge(Edge* e)
 void findRouteDFS(const Node* src,const Node* dst, const Path& p,Thread_safe_queue<Path>* paths, std::atomic_bool* allow) {
 	//Faster termination
 	if (!allow->load()) return;
-	if (p.edges.size() > 10) return;
+	if (p.edges.size() > 5) return;
 	if (src == dst) {
 		//Paralelize here --> we can use cpu power while waiting this to finish
 		// https://github.com/bshoshany/thread-pool
@@ -151,26 +153,32 @@ void findRouteDFS(const Node* src,const Node* dst, const Path& p,Thread_safe_que
 			}
 		}
 	}
+
+}
+void findRouteDFSWrapper(const Node* src,const Node* dst, const Path& p,Thread_safe_queue<Path>* paths, std::atomic_bool* allow) {
+    findRouteDFS(src,dst,p,paths,allow);
+    //Notify threads that it is finished
+    allow->store(false);
+    paths->GenDone();
 }
 
-
-IntervalPath consumeRoutes(Thread_safe_queue<Path>* buffer, std::atomic_bool* allow, int index, double target) {
-	double max = 0;
+IntervalPath consumeRoutes(Thread_safe_queue<Path>* buffer, std::atomic_bool* allow, int index, double target,double *max) {
 	IntervalPath ret;
 	while (allow->load()) {
 
 		//Do something
 		Path p = buffer->pop();
+        if(!p.init) continue;
 		curstate -= 1;
 		//Do calculation
 		auto [lpath, lmax] = CalcBestPath::calculateBestPath(p);
 
-		if (max < lmax) {
-			max = lmax;
+		if (*max < lmax) {
+			*max = lmax;
 			ret = lpath;
 		}
 
-		if (max - DefValues::targetWindow >= target) {
+		if (*max - DefValues::targetWindow >= target) {
 			allow->store(false);
 			//p.RemoveVisIntervals(ret,max);
 
@@ -180,14 +188,14 @@ IntervalPath consumeRoutes(Thread_safe_queue<Path>* buffer, std::atomic_bool* al
 
 	}
 	// other threead finished return an empty path
-	return {};
+	return ret;
 }
 
 [[noreturn]] void checkTPool(thread_pool* pool) {
 	int lastVal= curstate.load();
 	while (true) {
 		int curVal = curstate.load();
-		std::cout << "\r" <<  curVal<< " Delta: " << curVal - lastVal << "                                      " << std::flush;
+		//std::cout << "\r" <<  curVal<< " Delta: " << curVal - lastVal << "                                      " << std::flush;
 		lastVal = curVal;
         std::this_thread::sleep_for(100ms);
 	}
@@ -212,6 +220,7 @@ std::vector<Path> TVG::findRoutesBetween(const std::string& src, const std::stri
 
 
 	auto* cache = new Thread_safe_queue<Path>[main.size()+2];
+    auto rets = new double[main.size()+2];
 	std::vector<std::shared_future<IntervalPath>> goodPath;
 	auto* allowList = new std::atomic_bool[main.size()];
 
@@ -223,13 +232,12 @@ std::vector<Path> TVG::findRoutesBetween(const std::string& src, const std::stri
 		allowList[index] = true;
 		double target_val = p.edges.front()->getLargestThrougput();
 		std::cout << target_val << std::endl;
-		pool->submit(findRouteDFS, p.getLastNode(), end, p, &cache[index], &allowList[index]);
+		pool->submit(findRouteDFSWrapper, p.getLastNode(), end, p, &cache[index], &allowList[index]);
+		goodPath.emplace_back(pool->submit(consumeRoutes, &cache[index], &allowList[index], index, target_val, &rets[index]));
+        goodPath.emplace_back(pool->submit(consumeRoutes, &cache[index], &allowList[index], index, target_val, &rets[index]));
+        //goodPath.emplace_back(pool->submit(consumeRoutes, &cache[index], &allowList[index], index, target_val, &rets[index]));
 
-		goodPath.emplace_back(pool->submit(consumeRoutes, &cache[index], &allowList[index], index, target_val));
-        goodPath.emplace_back(pool->submit(consumeRoutes, &cache[index], &allowList[index], index, target_val));
-        goodPath.emplace_back(pool->submit(consumeRoutes, &cache[index], &allowList[index], index, target_val));
-
-		break;
+		//break;
 
 		index++;
 	}

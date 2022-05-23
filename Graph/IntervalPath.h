@@ -77,6 +77,7 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	double getThrougput() {
+        if(intervals.empty()) return 0;
 		double ret = intervals.front().getThrougput();
 
 		for (auto& edge : intervals) {

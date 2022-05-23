@@ -127,24 +127,24 @@ public:
 	/// <returns></returns>
 	bool fiRelation(VisibilityInterval& e) ;
 
-	double calcDeltaL(VisibilityInterval vi) {
+	[[nodiscard]] double calcDeltaL(const VisibilityInterval& vi) const {
 		return  start.getTime()- vi.start.getTime();		
 	}
-	double calcDeltaR(VisibilityInterval vi) {
+	[[nodiscard]] double calcDeltaR(const VisibilityInterval& vi) const {
 		return vi.end.getTime() - end.getTime();
 
 	}
-	double calcOmegaL(double curMin) {
+	[[nodiscard]] double calcOmegaL(double curMin) const {
 		return  curMin - this->start.getTime();
 	}
-	double calcOmegaR(double curMax) {
+	[[nodiscard]] double calcOmegaR(double curMax) const {
 		return this->end.getTime() - curMax;
 
 	}
 	
 
 
-	double getThrougput() {
+	[[nodiscard]] double getThrougput() const {
 		return througput;
 	}
 };
