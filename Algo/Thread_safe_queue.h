@@ -15,6 +15,7 @@ class Thread_safe_queue {
     std::queue<T> queue_;
     mutable std::mutex mutex_;
     std::condition_variable cond_;
+    std::atomic_bool finished = false;
 public:
 
 
@@ -33,10 +34,20 @@ public:
         queue_.template emplace(t);
         cond_.notify_all();
     }
-
+    [[nodiscard]]
+    size_t size() const{
+        std::unique_lock l(mutex_);
+        return  queue_.size();
+    }
 
     T pop(){
+
         std::unique_lock l(mutex_);
+        //if done
+        if(queue_.empty() && finished.load()){
+            return {};
+        }
+
         //Long time
         cond_.wait(l,[this]{return !queue_.empty();});
         T ret = queue_.front();
@@ -45,10 +56,8 @@ public:
     }
 
     void GenDone(){
+        finished.store(true);
         //This is a hack
-        for(int i = 0 ; i < 50; i++){
-            queue_.push(T());
-        }
         cond_.notify_all();
     }
 

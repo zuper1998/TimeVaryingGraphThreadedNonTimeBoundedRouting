@@ -2,20 +2,43 @@
 
 #include "Graph/TVG.h"
 #include "Graph/Path.h"
+#include "Algo/postProcess.h"
+#include <filesystem>
+
 #define PRINT(X) std::cout << X << std::endl;
+
+using std::filesystem::directory_iterator;
+
+
+
 void retEdges() {
-    TVG tvg(R"(C:\Users\Narcano\CLionProjects\TVGGraphCalc\DataIn\QSAT_CROS_LOW.txt.satNetwork)");
-    for (const Path& p : tvg.findRoutesBetween("Budapest", "Helsinki")) {
-        std::cout << p;
+    std::string path = R"(../InputData)";
+    if(DefValues::isTest){
+        path = R"(../TestInputData)";
     }
+    for (const auto &file: directory_iterator(path)) {
+        PRINT(file.path());
 
+        TVG tvg(file.path().string());
+        std::vector<std::string> cities = tvg.getCitiesWithout("");
 
+        for (const std::string &start: cities) {
+            Node *findNode = tvg.findNode(start);
+            auto destinations = tvg.getNodesWithout(tvg.findNode(start));
+            postProcess::writeToFile(file,
+                    postProcess::processData(tvg.findRoutesBetween(start, tvg.getCitiesWithout(start)), findNode,
+                                             destinations),
+                    findNode,
+                    destinations
+            );
+
+        }
+    }
 
 
 }
 
-int main()
-{
+int main() {
     retEdges();
 
 }

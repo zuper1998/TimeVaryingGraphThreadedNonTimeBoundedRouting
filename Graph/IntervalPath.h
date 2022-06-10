@@ -77,7 +77,7 @@ public:
 	/// Min val since throughput 
 	/// </summary>
 	/// <returns></returns>
-	double getThrougput() {
+	[[nodiscard]] double getThrougput() const {
         if(intervals.empty()) return 0;
 		double ret = intervals.front().getThrougput();
 

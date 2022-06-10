@@ -32,11 +32,12 @@ public:
 	std::vector<Edge*> getEdges() {
 		return edges;
 	}
-	bool operator ==(const Node& outer) {
+
+    [[nodiscard]]
+	bool operator ==(const Node& outer) const {
 		return name == outer.name;
 	}
 	friend std::ostream& operator << ( std::ostream& os, Node n);
-
 };
 
 

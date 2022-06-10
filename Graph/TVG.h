@@ -8,6 +8,7 @@
 #include <queue>
 #include <atomic>
 #include <future>
+#include "../LoadException.h"
 #include "../Lib/thread-pool-2.0.0/thread_pool.hpp"
 #include "Node.h"
 #include "Path.h"
@@ -15,6 +16,7 @@
 /// <summary>
 /// Class for the whole graph
 /// </summary>
+#define CalculatedIntervals std::vector<std::tuple<IntervalPath, Path>>
 using namespace  std::chrono_literals;
 
 struct satTemp {
@@ -68,7 +70,7 @@ public:
 
 		}
 		//1 + 4*x
-		pool = new thread_pool(10);
+		pool = new thread_pool(4);
 	}
 
     TVG operator =(TVG) = delete;
@@ -93,8 +95,11 @@ public:
 	/// <param name=""></param>
 	/// <returns></returns>
 	static Edge* findEdge(Edge*);
-	std::vector<Path> findRoutesBetween(const std::string &src, const std::string &dst);
+	std::vector<std::vector<std::tuple<IntervalPath, Path>>>
+    findRoutesBetween(const std::string &src, const std::vector<std::string>& dests);
+    std::vector<std::string> getCitiesWithout(const std::string&);
 
+    std::vector<Node*>  getNodesWithout(Node *pNode);
 };
 
 

@@ -25,4 +25,4 @@ list (REMOVE_DUPLICATES Graph_INCLUDE_DIRS)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(TVGGraphCalc main.cpp Lib/thread-pool-2.0.0/thread_pool.hpp ${Graph_SOURCES} ${Algo_SOURCES} Algo/Thread_safe_queue.cpp Algo/Thread_safe_queue.h)
+add_executable(TVGGraphCalc main.cpp Lib/thread-pool-2.0.0/thread_pool.hpp ${Graph_SOURCES} ${Algo_SOURCES} Algo/Thread_safe_queue.cpp Algo/Thread_safe_queue.h LoadException.h LoadExeption.cpp Algo/postProcess.cpp Algo/postProcess.h)

@@ -33,6 +33,8 @@ public:
 		return v1->getThrougput();
 	}
 
+
+
 	std::vector<VisibilityInterval>  getVisIntervalVal() {
 		std::shared_lock lock(mutex_);
 		return vis_intervals;
