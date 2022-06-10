@@ -133,9 +133,8 @@ Edge* TVG::findEdge(Edge* e)
 void findRouteDFS(const Node* src,const Node* dst, const Path& p,Thread_safe_queue<Path>* paths, std::atomic_bool* allow) {
 	//Faster termination
 	if (!allow->load()) return;
-	if (p.edges.size() > 5) return;
+	if (p.edges.size() > 10) return;
 	if (src == dst) {
-		//Paralelize here --> we can use cpu power while waiting this to finish
 		// https://github.com/bshoshany/thread-pool
 		paths->push(p);
 		//Stat
@@ -161,13 +160,15 @@ void findRouteDFSWrapper(const Node* src,const Node* dst, const Path& p,Thread_s
     paths->GenDone();
 }
 
-IntervalPath consumeRoutes(Thread_safe_queue<Path>* buffer, std::atomic_bool* allow, int index, double target,double *max) {
+std::pair<IntervalPath,Path>  consumeRoutes(Thread_safe_queue<Path>* buffer, std::atomic_bool* allow, int index, double target,double *max) {
 	IntervalPath ret;
+    Path retp;
 	while (allow->load()) {
 
 		//Do something
 		Path p = buffer->pop();
         if(!p.init) continue;
+
 		curstate -= 1;
 		//Do calculation
 		auto [lpath, lmax] = CalcBestPath::calculateBestPath(p);
@@ -175,6 +176,7 @@ IntervalPath consumeRoutes(Thread_safe_queue<Path>* buffer, std::atomic_bool* al
 		if (*max < lmax) {
 			*max = lmax;
 			ret = lpath;
+            retp = p;
 		}
 
 		if (*max - DefValues::targetWindow >= target) {
@@ -182,12 +184,16 @@ IntervalPath consumeRoutes(Thread_safe_queue<Path>* buffer, std::atomic_bool* al
 			//p.RemoveVisIntervals(ret,max);
 
 
-			return ret;
+			return {ret,retp};
 		}
 
 	}
-	// other threead finished return an empty path
-	return ret;
+	// other thread finished return an empty path
+    if(ret.getThrougput() == *max)
+	    return  {ret,retp};
+    else {
+        return {};
+    }
 }
 
 [[noreturn]] void checkTPool(thread_pool* pool) {
@@ -200,6 +206,18 @@ IntervalPath consumeRoutes(Thread_safe_queue<Path>* buffer, std::atomic_bool* al
 	}
 }
 
+
+std::ostream & operator << (std::ostream & os, std::pair<IntervalPath,Path> const& toPrint ){
+    IntervalPath ip = toPrint.first;
+    Path p = toPrint.second;
+
+    os<<p << std::endl;
+    for(const VisibilityInterval& visibilityInterval : ip.intervals){
+        os << visibilityInterval.througput << " | ";
+    }
+    os << std::endl;
+    return os;
+}
 
 //All routes are bidirectional, the routes are twice between all sats:
 // This means that there are two bidirectional routes between all sats
@@ -220,7 +238,10 @@ std::vector<Path> TVG::findRoutesBetween(const std::string& src, const std::stri
 
 	auto* cache = new Thread_safe_queue<Path>[main.size()+2];
     auto rets = new double[main.size()+2];
-	std::vector<std::shared_future<IntervalPath>> goodPath;
+    for(int i =0 ; i< main.size()+2;i++){
+        rets[i] = 0;
+    }
+	std::vector<std::shared_future<std::pair<IntervalPath,Path>>> goodPath;
 	auto* allowList = new std::atomic_bool[main.size()];
 
 	//DFS faster
@@ -230,22 +251,23 @@ std::vector<Path> TVG::findRoutesBetween(const std::string& src, const std::stri
 	for (auto p : main) {
 		allowList[index] = true;
 		double target_val = p.edges.front()->getLargestThrougput();
-		std::cout << target_val << std::endl;
+		//std::cout << target_val << std::endl;
 		pool->submit(findRouteDFSWrapper, p.getLastNode(), end, p, &cache[index], &allowList[index]);
 		goodPath.emplace_back(pool->submit(consumeRoutes, &cache[index], &allowList[index], index, target_val, &rets[index]));
         goodPath.emplace_back(pool->submit(consumeRoutes, &cache[index], &allowList[index], index, target_val, &rets[index]));
-        //goodPath.emplace_back(pool->submit(consumeRoutes, &cache[index], &allowList[index], index, target_val, &rets[index]));
+        goodPath.emplace_back(pool->submit(consumeRoutes, &cache[index], &allowList[index], index, target_val, &rets[index]));
 
 		//break;
 
 		index++;
 	}
 
-	for (std::shared_future<IntervalPath> const&  p : goodPath) {
-        bool a = p.valid();
-		IntervalPath pp = p.get();
-		std::cout << pp.getThrougput() << std::endl;
+	for (std::shared_future<std::pair<IntervalPath,Path>> const&  sharedFuture : goodPath) {
+
+		std::cout << sharedFuture.get() << std::endl;
 	}
+
+
 
 	return ret;
 }

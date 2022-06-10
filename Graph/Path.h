@@ -60,7 +60,7 @@ public:
 	
 	void RemoveVisIntervals(IntervalPath const&,double);
 
-	friend std::ostream& operator << (std::ostream& os, Path p );
+	friend std::ostream& operator << (std::ostream& os, const Path& p );
 };
 
 

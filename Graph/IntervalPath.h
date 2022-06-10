@@ -4,7 +4,7 @@
 #include "../DefValues.h"
 class IntervalPath
 {
-	void addPath(VisibilityInterval vi) {
+	void addPath(const VisibilityInterval& vi) {
 		curMax = curMax > vi.end ? curMax : vi.end;
 		curMin = curMin < vi.start ? curMin : vi.start;
 		intervals.push_back(vi);
@@ -23,6 +23,9 @@ public:
 	explicit IntervalPath(const VisibilityInterval& vi) : curMax(vi.end), curMin(vi.start) {
 		addPath(vi);
 	}
+
+	IntervalPath(const IntervalPath& outer)  = default;
+
 
 	explicit IntervalPath(IntervalPath const& parent, VisibilityInterval const& vi) {
 		*this = parent;

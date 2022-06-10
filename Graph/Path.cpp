@@ -3,9 +3,8 @@
 std::ostream& operator<<( std::ostream& os, Path const& p)
 {
 	for (Edge *e : p.edges) {
-		os << *e->start << " --> " << *e->end << " -->" ;
+		os << *e->start << " --> " << *e->end << " | " ;
 	}
-	os << std::endl;
 	return os;
 }
 
@@ -21,3 +20,4 @@ void Path::RemoveVisIntervals(IntervalPath const& p,double tr)
 	}
 
 }
+

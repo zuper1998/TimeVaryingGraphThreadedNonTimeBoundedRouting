@@ -6,7 +6,7 @@
 void retEdges() {
     TVG tvg(R"(C:\Users\Narcano\CLionProjects\TVGGraphCalc\DataIn\QSAT_CROS_LOW.txt.satNetwork)");
     for (const Path& p : tvg.findRoutesBetween("Budapest", "Helsinki")) {
-        std::cout << "" << p;
+        std::cout << p;
     }
 
 
