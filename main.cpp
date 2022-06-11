@@ -26,12 +26,11 @@ void retEdges() {
             Node *findNode = tvg.findNode(start);
             auto destinations = tvg.getNodesWithout(tvg.findNode(start));
             postProcess::writeToFile(file,
-                    postProcess::processData(tvg.findRoutesBetween(start, tvg.getCitiesWithout(start)), findNode,
-                                             destinations),
+                    tvg.findRoutesBetween(start, tvg.getCitiesWithout(start)),
                     findNode,
                     destinations
             );
-
+            break;
         }
     }
 

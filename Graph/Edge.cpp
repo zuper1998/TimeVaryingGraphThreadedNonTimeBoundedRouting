@@ -46,7 +46,3 @@ bool Edge::operator==(Edge const& e) const
 	bool b2 = (start == e.end && end == e.start);
 	return b1;// || b2;
 }
-std::ostream& operator<< (std::ostream& os, Edge const& e)
-{
-	return os;
-}

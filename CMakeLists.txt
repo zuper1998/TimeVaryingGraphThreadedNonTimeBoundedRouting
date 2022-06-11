@@ -24,5 +24,6 @@ endforeach()
 list (REMOVE_DUPLICATES Graph_INCLUDE_DIRS)
 
 set(CMAKE_CXX_STANDARD 20)
-
-add_executable(TVGGraphCalc main.cpp Lib/thread-pool-2.0.0/thread_pool.hpp ${Graph_SOURCES} ${Algo_SOURCES} Algo/Thread_safe_queue.cpp Algo/Thread_safe_queue.h LoadException.h LoadExeption.cpp Algo/postProcess.cpp Algo/postProcess.h)
+find_package (Threads)
+add_executable(TVGGraphCalc main.cpp Lib/thread-pool-2.0.0/thread_pool.hpp ${Graph_SOURCES} ${Algo_SOURCES} Algo/DataStruct/Thread_safe_queue.cpp Algo/DataStruct/Thread_safe_queue.h LoadException.h LoadExeption.cpp Algo/postProcess.cpp Algo/postProcess.h Algo/DataStruct/bestRouteContainer.cpp Algo/DataStruct/GraphDataStruct.h Algo/DataStruct/DataNode.cpp Algo/DataStruct/DataNode.h Utility.h)
+target_link_libraries (TVGGraphCalc ${CMAKE_THREAD_LIBS_INIT})

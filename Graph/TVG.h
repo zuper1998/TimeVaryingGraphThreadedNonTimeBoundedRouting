@@ -12,7 +12,8 @@
 #include "../Lib/thread-pool-2.0.0/thread_pool.hpp"
 #include "Node.h"
 #include "Path.h"
-#include "../Algo/Thread_safe_queue.h"
+#include "../Algo/DataStruct/Thread_safe_queue.h"
+#include "../Algo/DataStruct/GraphDataStruct.h"
 /// <summary>
 /// Class for the whole graph
 /// </summary>
@@ -70,7 +71,7 @@ public:
 
 		}
 		//1 + 4*x
-		pool = new thread_pool(4);
+		pool = new thread_pool(20);
 	}
 
     TVG operator =(TVG) = delete;
@@ -95,7 +96,7 @@ public:
 	/// <param name=""></param>
 	/// <returns></returns>
 	static Edge* findEdge(Edge*);
-	std::vector<std::vector<std::tuple<IntervalPath, Path>>>
+	GraphDataStruct
     findRoutesBetween(const std::string &src, const std::vector<std::string>& dests);
     std::vector<std::string> getCitiesWithout(const std::string&);
 

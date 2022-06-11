@@ -37,6 +37,17 @@ public:
 	bool operator ==(const Node& outer) const {
 		return name == outer.name;
 	}
+
+    std::vector<VisibilityInterval> getAllIntervals(){
+        std::vector<VisibilityInterval> ret;
+        for(auto&p:edges){
+            for(auto&iv :p->getVisIntervalVal()){
+                ret.push_back(iv);
+            }
+        }
+        return ret;
+    }
+
 	friend std::ostream& operator << ( std::ostream& os, Node n);
 };
 

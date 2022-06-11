@@ -128,17 +128,17 @@ static bool isDest(const std::vector<Node *> &destinations, Edge *const p) {
  * BFS walk of the graph, bounded at a constant value defined in constant
  */
 void
-findRouteBFSWrapper(Node *const src, const std::vector<Node *> &destinations, const std::vector<Path> &initialPaths,
-                    Thread_safe_queue<Path> *paths, std::atomic_bool &allow) {
+findRouteBFSWrapper(const std::vector<Node *> *destinations, const std::vector<Path> *initialPaths,
+                    Thread_safe_queue<Path> *paths) {
     std::vector<Path> data{Path()};
-    std::vector<Path> tmp_data(initialPaths);
+    std::vector<Path> tmp_data(*initialPaths);
     //std::cout << "STARTING:" << src->getName() << std::endl;
     while (!data.empty()) {
         data.swap(tmp_data);
         tmp_data.clear();
         for (auto const &path: data) {
             if (tmp_data.size() > DefValues::maxSimPaths) break;
-            iterOverEdges(destinations, paths, tmp_data, path);
+            iterOverEdges(*destinations, paths, tmp_data, path);
         }
     }
     //allow.store(false); //This force stops all
@@ -149,6 +149,8 @@ findRouteBFSWrapper(Node *const src, const std::vector<Node *> &destinations, co
 
 
 }
+
+
 
 bool canBeAdded(const Path &path, Edge *const e) {
     Node *curr = e->start != path.getLastNode() ? e->start : e->end;
@@ -167,15 +169,15 @@ void iterOverEdges(const std::vector<Node *> &destinations, Thread_safe_queue<Pa
 }
 
 
-CalculatedIntervals calculateInterval(Thread_safe_queue<Path> *buffer) {
-    CalculatedIntervals ret{};
+GraphDataStruct calculateInterval(Thread_safe_queue<Path> *buffer) {
+    GraphDataStruct ret{};
 
     Path retp;
     while (true) {
         Path p = buffer->pop();
         if (!p.init) break;
         auto[lpath, lmax] = CalcBestPath::calculateBestPath(p);
-        ret.emplace_back(lpath, p);
+        ret.addPath(lpath,p);
     }
     return ret;
 }
@@ -222,17 +224,17 @@ std::ostream &operator<<(std::ostream &os, std::pair<IntervalPath, Path> const &
     return os;
 }
 
-void checkSize(Thread_safe_queue<Path> *const p) {
+[[noreturn]] void checkSize(Thread_safe_queue<Path> *const p) {
     while (true) {
-        if(p->empty()) break;
         std::cout << "Queue :" << p->size() << "                 \r" << std::flush;
         std::this_thread::sleep_for(1s);
     }
 }
 
+
 //All routes are bidirectional, the routes are twice between all sats:
 // This means that there are two bidirectional routes between all sats
-std::vector<std::vector<std::tuple<IntervalPath, Path>>>
+GraphDataStruct
 TVG::findRoutesBetween(const std::string &src, const std::vector<std::string> &dests) {
     std::vector<Path> main;
     Node *start = findNode(src);
@@ -249,55 +251,54 @@ TVG::findRoutesBetween(const std::string &src, const std::vector<std::string> &d
     }
 
 
-    Thread_safe_queue<Path> cache{};
-    double rets = 0;
+    Thread_safe_queue<Path> cache(DefValues::queue_max_size);
 
-    std::vector<std::shared_future<std::pair<IntervalPath, Path>>> goodPath;
-    std::vector<std::shared_future<CalculatedIntervals> > paths;
+    std::vector<std::shared_future<GraphDataStruct> > paths;
     std::atomic_bool allowBool;
     allowBool.store(true);
 
-    //BFS is more managable
-    findRouteBFSWrapper(start, destinations, main, &cache, allowBool);
 
+
+    //BFS is more managable
+    pool->submit(findRouteBFSWrapper, &destinations, &main, &cache);
 
     /*goodPath.emplace_back(
             pool->submit(consumeRoutes, &cache, &allowBool, &rets));*/
-    paths.emplace_back(
-            pool->submit(calculateInterval, &cache)
-    );
-    paths.emplace_back(
-            pool->submit(calculateInterval, &cache)
-    );
-    paths.emplace_back(
-            pool->submit(calculateInterval, &cache)
-    );
-    //pool->submit(checkSize, &cache);
+    paths.reserve(7);
+    for(int i = 0; i< 7; i++){
+        paths.emplace_back(
+                pool->submit(calculateInterval, &cache)
+        );
+    }
 
-    std::vector<std::vector<std::tuple<IntervalPath, Path>>> ret;
-    ret.reserve(paths.size());
-    for(auto& p : paths){
-        ret.push_back(p.get());
+
+    pool->submit(checkSize, &cache);
+
+
+
+    GraphDataStruct ret;
+    for (auto &p: paths) {
+        ret.concat(p.get());
     }
 
 
     return ret;
 }
 
-std::vector<std::string> TVG::getCitiesWithout(const std::string& in) {
+std::vector<std::string> TVG::getCitiesWithout(const std::string &in) {
     std::vector<std::string> ret;
-    for(const auto& satelliteNode : nodes){
-        if(satelliteNode.getName().find("SAT")==std::string::npos && satelliteNode.getName() != in){
+    for (const auto &satelliteNode: nodes) {
+        if (satelliteNode.getName().find("SAT") == std::string::npos && satelliteNode.getName() != in) {
             ret.push_back(satelliteNode.getName());
         }
     }
     return ret;
 }
 
-std::vector<Node*> TVG::getNodesWithout(Node *pNode) {
-    std::vector<Node*> ret;
-    for(auto& satelliteNode : nodes){
-        if(satelliteNode.getName().find("SAT")==std::string::npos && satelliteNode.getName() != pNode->getName()){
+std::vector<Node *> TVG::getNodesWithout(Node *pNode) {
+    std::vector<Node *> ret;
+    for (auto &satelliteNode: nodes) {
+        if (satelliteNode.getName().find("SAT") == std::string::npos && satelliteNode.getName() != pNode->getName()) {
             ret.push_back(&satelliteNode);
         }
     }

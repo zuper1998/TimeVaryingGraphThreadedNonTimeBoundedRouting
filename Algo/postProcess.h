@@ -16,12 +16,12 @@
 #include <fstream>
 #include "../Graph/IntervalPath.h"
 #include "../Graph/Path.h"
-
+#include "../Algo/DataStruct/GraphDataStruct.h"
 class postProcess {
 public:
 
     static void
-    writeToFile(const std::filesystem::directory_entry &f, RETURN_VAL data, Node *start,
+    writeToFile(const std::filesystem::directory_entry &f, GraphDataStruct data, Node *start,
                 const std::vector<Node *> &destinations);
 
     static std::string get_stem(const std::filesystem::path &p) { return (p.stem().string()); }

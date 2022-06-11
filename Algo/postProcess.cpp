@@ -57,9 +57,8 @@ postProcess::processData(std::vector<std::vector<std::tuple<IntervalPath, Path>>
 
 
 
-void postProcess::writeToFile(const std::filesystem::directory_entry &f, RETURN_VAL data, Node *start,
+void postProcess::writeToFile(const std::filesystem::directory_entry &f, GraphDataStruct data, Node *start,
                               const std::vector<Node *> &destinations) {
-    auto[edges_best, path_best] = std::move(data);
 
 
     std::stringstream outputGeoData;
@@ -72,17 +71,9 @@ void postProcess::writeToFile(const std::filesystem::directory_entry &f, RETURN_
     std::ofstream outGeoData(outputGeoData.str(), std::ios_base::out);
 
     for (auto &d_node: destinations) {
-        double sum = 0;
 
+        double sum = data.getBestForNode(start->getName(), d_node->getName());
 
-
-
-        for (auto &edge: start->getEdges()) {
-            for (auto &iEdge: edge->getVisIntervalVal()) {
-                std::string edgeHash = start->getName() + EdgeToStr(iEdge) + d_node->getName();
-                sum += edges_best[edgeHash];
-            }
-        }
         printf("For the path between %s and %s avarage bitrate was %f sent bits: %f\n", start->getName().c_str(),
                d_node->getName().c_str(), sum / (3600 * 4), sum);
         outGeoData <<  d_node->getName().c_str() << "|" <<sum / (3600 * 4)<<std::endl;
