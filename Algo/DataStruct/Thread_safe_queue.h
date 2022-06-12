@@ -9,6 +9,7 @@
 #include <shared_mutex>
 #include <atomic>
 #include <condition_variable>
+#include "../../DefValues.h"
 using namespace  std::chrono_literals;
 
 template <typename T>
@@ -33,6 +34,7 @@ public:
     }
     void push(T &&t){
         std::unique_lock l(mutex_);
+        cond_.wait(l,[&]{return queue_.size()<DefValues::queue_max_size;});
         queue_.push(t);
         cond_.notify_all();
     }
@@ -59,6 +61,7 @@ public:
         cond_.wait(l,[this]{return !queue_.empty();});
         T ret = queue_.front();
         queue_.pop();
+        cond_.notify_all();
         return ret;
     }
 

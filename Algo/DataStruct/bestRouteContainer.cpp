@@ -31,6 +31,8 @@ double GraphDataStruct::getBestForNode(std::string const &edge_name, const std::
     return tr;
 }
 
+
+
 void GraphDataStruct::concat(const GraphDataStruct &aStruct) {
     for(auto[key,val] : aStruct.data_map){
         for(auto& edge : val.getEdges()){

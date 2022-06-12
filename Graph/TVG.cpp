@@ -142,6 +142,7 @@ findRouteBFSWrapper(const std::vector<Node *> *destinations, const std::vector<P
     while (!data.empty()) {
         data.swap(tmp_data);
         tmp_data.clear();
+        std::cout << "BEEP" << std::endl;
         for (auto const &path: data) {
             if (tmp_data.size() > DefValues::maxSimPaths) break;
             iterOverEdges(*destinations, paths, tmp_data, path);
@@ -166,7 +167,7 @@ bool canBeAdded(const Path &path, Edge *const e) {
 void iterOverEdges(const std::vector<Node *> &destinations, Thread_safe_queue<Path> *paths, std::vector<Path> &tmp_data,
                    const Path &path) {
     for (auto const edge: path.getLastNode()->getEdges()) {
-        if (tmp_data.size() > DefValues::maxSimPaths) break;
+        if (tmp_data.size() > DefValues::maxSimPaths) return;
         if (isDest(destinations, edge)) {
             paths->push(Path(path, edge));
         } else if (canBeAdded(path, edge)) {
@@ -242,8 +243,9 @@ TVG::findRoutesBetween(const std::string &src, const std::vector<std::string> &d
 
     /*goodPath.emplace_back(
             pool->submit(consumeRoutes, &cache, &allowBool, &rets));*/
-    paths.reserve(7);
-    for(int i = 0; i< 7; i++){
+    constexpr size_t thread_num = 4;
+    paths.reserve(thread_num);
+    for(int i = 0; i< thread_num; i++){
         paths.emplace_back(
                 pool->submit(calculateInterval, &cache)
         );

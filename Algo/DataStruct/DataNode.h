@@ -93,6 +93,13 @@ public:
         return is_already_used || is_dest;
     }
 
+    size_t getMemoryUsage(){
+        size_t ret =0;
+        for(auto[key,val] : data_edge){
+            ret+= sizeof(val);
+        }
+        return ret;
+    }
 
 };
 

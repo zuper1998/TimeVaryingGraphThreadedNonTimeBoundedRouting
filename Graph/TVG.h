@@ -73,7 +73,7 @@ public:
 
 		}
 		//1 + 4*x
-		pool = new thread_pool(20);
+		pool = new thread_pool(6);
 	}
 
     TVG operator =(TVG) = delete;

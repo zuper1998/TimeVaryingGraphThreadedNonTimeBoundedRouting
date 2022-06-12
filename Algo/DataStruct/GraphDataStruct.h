@@ -28,14 +28,21 @@ class GraphDataStruct {
 
 public:
     void addPath(const IntervalPath &, Path const &);
-    void addPath(std::tuple< IntervalPath , Path> data){
-        addPath(std::get<0>(data),std::get<1>(data));
-    }
 
 
     double getBestForNode(std::string const &edge_name, const std::string& destination);
 
     void concat(const GraphDataStruct &aStruct);
+
+    size_t getMemoryUsage(){
+        size_t ret = 0;
+        for(auto[key, val] : data_map){
+            ret += val.getMemoryUsage();
+        }
+        return ret;
+    }
+
+
 };
 
 
