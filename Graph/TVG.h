@@ -58,8 +58,10 @@ class TVG
 	/// List of the nodes in the graph
 	/// </summary>
 	std::vector<Node> nodes;
+    std::vector<Edge*> edges;
 public:
 	thread_pool* pool;
+
 
 
 	explicit TVG(const std::string& f) {
@@ -76,11 +78,16 @@ public:
 
     TVG operator =(TVG) = delete;
     TVG (const TVG&) = delete;
+    ~TVG(){
+        for(Edge *edge : edges){
+            delete edge;
+        }
+    }
 	/// <summary>
 	/// Add edge to the nodes it contains
 	/// </summary>
 	/// <param name="e"></param>
-	static void addEdge(Edge* e);
+	void addEdge(Edge* e);
 	void addEdge(const DataHolder&);
 	Node* findNode(const std::string&);
 	void readFromFile(const std::string&);
@@ -96,11 +103,15 @@ public:
 	/// <param name=""></param>
 	/// <returns></returns>
 	static Edge* findEdge(Edge*);
-	GraphDataStruct
+    static Edge* findEdge(Node* n1,Node* n2);
+
+    GraphDataStruct
     findRoutesBetween(const std::string &src, const std::vector<std::string>& dests);
     std::vector<std::string> getCitiesWithout(const std::string&);
 
     std::vector<Node*>  getNodesWithout(Node *pNode);
+
+    static bool edgeAlreadyAdded(Node *n1, Node *n2);
 };
 
 

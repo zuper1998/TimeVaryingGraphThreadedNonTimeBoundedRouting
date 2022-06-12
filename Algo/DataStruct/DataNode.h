@@ -69,16 +69,14 @@ public:
      * Used vals are edges that are already used up
      */
     std::tuple<std::string, double> getThroughput(std::vector<std::string> const &used_vals, std::string const& destination) {
-        std::tuple<std::string, double> ret;
-        TVG_TIME curbest;
+        std::tuple<std::string, double> ret = {"",0};
         for(auto const& [key,val]: data_edge){
             if(destinationCheck(used_vals, destination, key)) continue;
             auto[i_path,path] = val;
-            TVG_TIME cur = i_path.intervals.end()->start;
-            if(curbest.getTime()==-1 || curbest<cur){
-                curbest = cur;
+            double tr = i_path.getThrougput();
+            if(std::get<1>(ret)<tr){
                 std::string e_name = path.visitedInOrder.back()->getName() + Utility::EdgeToStr(i_path.intervals.back());
-                ret = {e_name, i_path.getThrougput()};
+                ret = {name,tr};
             }
 
         }

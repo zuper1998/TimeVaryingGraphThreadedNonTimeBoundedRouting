@@ -10,32 +10,35 @@ DataHolder getDataFromLine(const std::string &l);
 void iterOverEdges(const std::vector<Node *> &destinations, Thread_safe_queue<Path> *paths, std::vector<Path> &tmp_data,
                    const Path &path);
 
-std::atomic<int> curstate(0);
+
 
 void TVG::addEdge(Edge *e) {
     //Here the edge is already inicialized with ctor
     //Set nodes
-
-
+    edges.push_back(e);
     e->start->addEdge(e);
     e->end->addEdge(e);
 }
 
+
+
 void TVG::addEdge(const DataHolder &dt) {
     Node *src = findNode(dt.src);
     Node *dst = findNode(dt.dst);
-    Edge *e = new Edge(src, dst);
+    Edge *e = nullptr;
+
     //Check if edge already added
-    if (!edgeAlreadyAdded(e)) {
+    if (!edgeAlreadyAdded(src,dst)) {
+        e = new Edge(src, dst);
         addEdge(e);
     } else {
-        e = findEdge(e);
+        e = findEdge(src,dst);
     }
     //If duplicate dont add
-    VisibilityInterval tmp = VisibilityInterval(TVG_TIME(std::strtol(dt.start.c_str(), nullptr, 10)),
-                                                TVG_TIME(std::strtol(dt.end.c_str(), nullptr, 10)),
+    VisibilityInterval tmp = VisibilityInterval(TVG_TIME(std::strtod(dt.start.c_str(), nullptr)),
+                                                TVG_TIME(std::strtod(dt.end.c_str(), nullptr)),
                                                 parseFloat(dt.values));
-
+    // Not dealocated since it is only deleted when we found a new one
     e->addVisInterval(tmp);
 
 }
@@ -106,18 +109,21 @@ void TVG::readFromFile(const std::string &f) {
 
 }
 
-bool TVG::edgeAlreadyAdded(Edge *e) {
-    return findEdge(e) != nullptr;
+
+bool TVG::edgeAlreadyAdded(Node* n1, Node * n2) {
+    return findEdge(n1,n2) != nullptr;
 }
 
-Edge *TVG::findEdge(Edge *e) {
-    for (Edge *e_inner: e->start->getEdges()) {
-        if (*e_inner == *e)
+
+Edge *TVG::findEdge(Node *n1,Node*n2) {
+    for(auto& e_inner : n1->getEdges()){
+        if(e_inner->start == n1 && e_inner->end == n2){
             return e_inner;
+        }
     }
+
     return nullptr;
 }
-
 
 static bool isDest(const std::vector<Node *> &destinations, Edge *const p) {
     return std::any_of(destinations.begin(), destinations.end(),
@@ -132,7 +138,7 @@ findRouteBFSWrapper(const std::vector<Node *> *destinations, const std::vector<P
                     Thread_safe_queue<Path> *paths) {
     std::vector<Path> data{Path()};
     std::vector<Path> tmp_data(*initialPaths);
-    //std::cout << "STARTING:" << src->getName() << std::endl;
+    std::cout << "STARTING:" << std::endl;
     while (!data.empty()) {
         data.swap(tmp_data);
         tmp_data.clear();
@@ -142,7 +148,7 @@ findRouteBFSWrapper(const std::vector<Node *> *destinations, const std::vector<P
         }
     }
     //allow.store(false); //This force stops all
-    // std::cout << "Finishing:" << src->getName() << std::endl;
+    std::cout << "Finishing:" << std::endl;
 
 
     paths->GenDone();
@@ -160,6 +166,7 @@ bool canBeAdded(const Path &path, Edge *const e) {
 void iterOverEdges(const std::vector<Node *> &destinations, Thread_safe_queue<Path> *paths, std::vector<Path> &tmp_data,
                    const Path &path) {
     for (auto const edge: path.getLastNode()->getEdges()) {
+        if (tmp_data.size() > DefValues::maxSimPaths) break;
         if (isDest(destinations, edge)) {
             paths->push(Path(path, edge));
         } else if (canBeAdded(path, edge)) {
@@ -180,35 +187,6 @@ GraphDataStruct calculateInterval(Thread_safe_queue<Path> *buffer) {
         ret.addPath(lpath,p);
     }
     return ret;
-}
-
-std::pair<IntervalPath, Path>
-consumeRoutes(Thread_safe_queue<Path> *buffer, std::atomic_bool *allow, double *max) {
-    IntervalPath ret;
-    Path retp;
-    while (allow->load()) {
-
-        //Do something
-        Path p = buffer->pop();
-        if (!p.init) break;
-
-        curstate -= 1;
-        //Do calculation
-        auto[lpath, lmax] = CalcBestPath::calculateBestPath(p);
-
-        if (*max < lmax) {
-            *max = lmax;
-            ret = lpath;
-            retp = p;
-        }
-
-    }
-    // other thread finished return an empty path
-    if (ret.getThrougput() == *max)
-        return {ret, retp};
-    else {
-        return {};
-    }
 }
 
 
@@ -241,11 +219,12 @@ TVG::findRoutesBetween(const std::string &src, const std::vector<std::string> &d
 
     std::vector<Node *> destinations;
 
+    destinations.reserve(dests.size());
     for (auto &str: dests) {
         destinations.push_back(findNode(str));
     }
     for (auto &e: start->getEdges()) {
-        //Create a path with all the starting edges
+        //Start should have edges that start from sats too
         main.emplace_back(e, start);
 
     }
@@ -254,8 +233,7 @@ TVG::findRoutesBetween(const std::string &src, const std::vector<std::string> &d
     Thread_safe_queue<Path> cache(DefValues::queue_max_size);
 
     std::vector<std::shared_future<GraphDataStruct> > paths;
-    std::atomic_bool allowBool;
-    allowBool.store(true);
+
 
 
 
@@ -272,7 +250,7 @@ TVG::findRoutesBetween(const std::string &src, const std::vector<std::string> &d
     }
 
 
-    pool->submit(checkSize, &cache);
+    //pool->submit(checkSize, &cache);
 
 
 

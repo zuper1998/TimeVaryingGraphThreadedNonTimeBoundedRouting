@@ -19,10 +19,16 @@ void retEdges() {
     for (const auto &file: directory_iterator(path)) {
         PRINT(file.path());
 
+
         TVG tvg(file.path().string());
         std::vector<std::string> cities = tvg.getCitiesWithout("");
 
         for (const std::string &start: cities) {
+
+            if(DefValues::isTest && start.starts_with("Test")){
+                continue;
+            }
+
             Node *findNode = tvg.findNode(start);
             auto destinations = tvg.getNodesWithout(tvg.findNode(start));
             postProcess::writeToFile(file,
