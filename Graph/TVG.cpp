@@ -138,18 +138,18 @@ findRouteBFSWrapper(const std::vector<Node *> *destinations, const std::vector<P
                     Thread_safe_queue<Path> *paths) {
     std::vector<Path> data{Path()};
     std::vector<Path> tmp_data(*initialPaths);
-    std::cout << "STARTING:" << std::endl;
+    //std::cout << "STARTING:" << std::endl;
     while (!data.empty()) {
         data.swap(tmp_data);
         tmp_data.clear();
-        std::cout << "BEEP" << std::endl;
+        //std::cout << "BEEP" << std::endl;
         for (auto const &path: data) {
             if (tmp_data.size() > DefValues::maxSimPaths) break;
             iterOverEdges(*destinations, paths, tmp_data, path);
         }
     }
     //allow.store(false); //This force stops all
-    std::cout << "Finishing:" << std::endl;
+    //std::cout << "Finishing:" << std::endl;
 
 
     paths->GenDone();
