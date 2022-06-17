@@ -36,7 +36,6 @@ void retEdges() {
                     findNode,
                     destinations
             );
-            break;
         }
     }
 
