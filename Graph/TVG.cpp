@@ -142,8 +142,9 @@ findRouteBFSWrapper(const std::vector<Node *> *destinations, const std::vector<P
     while (!data.empty()) {
         data.swap(tmp_data);
         tmp_data.clear();
-        //std::cout << "BEEP" << std::endl;
+        std::cout << data.size() << " | " << paths->size() << std::endl;
         for (auto const &path: data) {
+
             if (tmp_data.size() > DefValues::maxSimPaths) break;
             iterOverEdges(*destinations, paths, tmp_data, path);
         }
@@ -167,7 +168,6 @@ bool canBeAdded(const Path &path, Edge *const e) {
 void iterOverEdges(const std::vector<Node *> &destinations, Thread_safe_queue<Path> *paths, std::vector<Path> &tmp_data,
                    const Path &path) {
     for (auto const edge: path.getLastNode()->getEdges()) {
-        if (tmp_data.size() > DefValues::maxSimPaths) return;
         if (isDest(destinations, edge)) {
             paths->push(Path(path, edge));
         } else if (canBeAdded(path, edge)) {
@@ -184,6 +184,7 @@ GraphDataStruct calculateInterval(Thread_safe_queue<Path> *buffer) {
     while (true) {
         Path p = buffer->pop();
         if (!p.init) break;
+
         auto[lpath, lmax] = CalcBestPath::calculateBestPath(p);
         ret.addPath(lpath,p);
     }
@@ -231,7 +232,7 @@ TVG::findRoutesBetween(const std::string &src, const std::vector<std::string> &d
     }
 
 
-    Thread_safe_queue<Path> cache(DefValues::queue_max_size);
+    Thread_safe_queue<Path> cache;
 
     std::vector<std::shared_future<GraphDataStruct> > paths;
 
@@ -243,17 +244,17 @@ TVG::findRoutesBetween(const std::string &src, const std::vector<std::string> &d
 
     /*goodPath.emplace_back(
             pool->submit(consumeRoutes, &cache, &allowBool, &rets));*/
-    constexpr size_t thread_num = 4;
-    paths.reserve(thread_num);
-    for(int i = 0; i< thread_num; i++){
+
+    paths.reserve(TVG_THREADS);
+    for(int i = 0; i< TVG_THREADS; i++){
         paths.emplace_back(
                 pool->submit(calculateInterval, &cache)
         );
     }
 
-
-    //pool->submit(checkSize, &cache);
-
+#ifdef LOG
+    pool->submit(checkSize, &cache);
+#endif
 
 
     GraphDataStruct ret;
@@ -261,6 +262,8 @@ TVG::findRoutesBetween(const std::string &src, const std::vector<std::string> &d
         ret.concat(p.get());
     }
 
+
+    ret.PrintNodes();
 
     return ret;
 }

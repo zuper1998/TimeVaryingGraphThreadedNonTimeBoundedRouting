@@ -42,6 +42,12 @@ public:
         return ret;
     }
 
+    void PrintNodes(){
+        for(auto[key,node] : data_map){
+            node.printPaths();
+        }
+        std::cout<< std::flush;
+    }
 
 };
 

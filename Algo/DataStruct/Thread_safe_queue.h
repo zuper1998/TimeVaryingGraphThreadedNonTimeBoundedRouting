@@ -18,13 +18,7 @@ class Thread_safe_queue {
     mutable std::mutex mutex_;
     std::condition_variable cond_;
     std::atomic_bool finished = false;
-    size_t max_size=0;
 public:
-    //For memory usage
-    explicit Thread_safe_queue(size_t max_size): max_size(max_size)  {
-
-    }
-
 
     void push(T const& t){
         std::unique_lock l(mutex_);

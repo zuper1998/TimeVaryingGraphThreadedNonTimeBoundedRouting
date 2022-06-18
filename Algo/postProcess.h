@@ -32,11 +32,8 @@ public:
                           std::unordered_map<std::string, std::tuple<IntervalPath, Path>> &path_best,
                           const std::tuple<IntervalPath, Path> &path);
 
-    static std::string EdgeToStr(const VisibilityInterval &interval);
 
-    static RETURN_VAL
-    processData(std::vector<std::vector<std::tuple<IntervalPath, Path>>> const &data, Node *start,
-                const std::vector<Node *> &destinations);
+
 };
 
 

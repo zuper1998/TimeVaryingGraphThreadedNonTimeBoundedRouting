@@ -53,16 +53,11 @@ public:
      */
     void addEdge(const std::string& edge_name, edge_data const&data){
         data_edge.try_emplace(edge_name,data);
-
-        if(std::get<0>(data_edge[edge_name]).getThrougput()< std::get<0>(data).getThrougput()){
+        double l_tr = std::get<0>(data_edge[edge_name]).getThrougput();
+        double r_tr = std::get<0>(data).getThrougput();
+        if(l_tr< r_tr ){
             data_edge[edge_name] = data;
         }
-    }
-
-    std::tuple<std::string,double> getThroughput(){
-        EdgeDataType ret = *std::min_element(data_edge.begin(),data_edge.end(),CompareStartDate());
-        auto[i_path,path] = ret.second;
-        return {ret.first,i_path.getThrougput()};
     }
 
     /*
@@ -99,6 +94,19 @@ public:
             ret+= sizeof(val);
         }
         return ret;
+    }
+
+    void printPaths(){
+        std::cout<<name << std::endl;
+        for(auto[key,val] : data_edge){
+            Path path = std::get<1>(val);
+
+            for(Edge* e: path.edges){
+                std::cout << e->start->getName() << " --> " << e->end->getName() << " | ";
+            }
+            std::cout << std::get<0>(val).getThrougput();
+            std::cout<<"\n";
+        }
     }
 
 };

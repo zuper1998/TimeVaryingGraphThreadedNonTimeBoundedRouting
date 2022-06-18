@@ -14,6 +14,10 @@
 #include "Path.h"
 #include "../Algo/DataStruct/Thread_safe_queue.h"
 #include "../Algo/DataStruct/GraphDataStruct.h"
+
+
+
+#define TVG_THREADS 5
 /// <summary>
 /// Class for the whole graph
 /// </summary>
@@ -73,7 +77,7 @@ public:
 
 		}
 		//1 + 4*x
-		pool = new thread_pool(6);
+		pool = new thread_pool(TVG_THREADS+1);
 	}
 
     TVG operator =(TVG) = delete;

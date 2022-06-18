@@ -35,25 +35,6 @@ void postProcess::orderData(const Node *start, std::unordered_map<std::string, d
     }
 }
 
-RETURN_VAL
-postProcess::processData(std::vector<std::vector<std::tuple<IntervalPath, Path>>> const &data, Node *start,
-                         const std::vector<Node *> &destinations) {
-    std::unordered_map<std::string, double> edges_best;
-    std::unordered_map<std::string, std::tuple<IntervalPath, Path>> path_best;
-
-
-    //Load data to matrixes
-    for (auto &outer: data) {
-        for (auto &path: outer) {
-            orderData(start, edges_best, path_best, path);
-
-        }
-    }
-
-
-    //TODO: maybe implement hungarian algo
-    return {edges_best, path_best};
-}
 
 
 
@@ -72,7 +53,7 @@ void postProcess::writeToFile(const std::filesystem::directory_entry &f, GraphDa
 
     for (auto &d_node: destinations) {
 
-        double sum = data.getBestForNode(start->getName(), d_node->getName());
+        double sum = data.getBestForNode(start->getName(), d_node->getName())*DefValues::EntangledRate;
 
         printf("For the path between %s and %s avarage bitrate was %f sent bits: %f\n", start->getName().c_str(),
                d_node->getName().c_str(), sum / (3600 * 4), sum);
@@ -91,9 +72,3 @@ std::string postProcess::EdgeToStr(const IntervalPath &interval) {
     return buff.str();
 }
 
-std::string postProcess::EdgeToStr(const VisibilityInterval &interval) {
-    std::stringstream buff;
-    buff << "|" << interval.start.getTime() << interval.end.getTime() << "|";
-
-    return buff.str();
-}
