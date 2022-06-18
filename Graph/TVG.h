@@ -17,7 +17,7 @@
 
 
 
-#define TVG_THREADS 5
+#define TVG_THREADS 2
 /// <summary>
 /// Class for the whole graph
 /// </summary>
