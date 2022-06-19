@@ -1,7 +1,7 @@
-Berlin|0.00751337
-Budapest|0.0070177
-Rome|0.00822099
-Vienna|0.00785504
-Helsinki|0.0072561
-Paris|0.00465363
+Berlin|0.00954665
+Budapest|0.00954665
+Rome|0.00954665
+Vienna|0.00954665
+Helsinki|0.00954665
+Paris|0.00726258
 |0

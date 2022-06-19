@@ -16,6 +16,8 @@ class VisibilityInterval
 public:
     double througput = -1;
 
+    VisibilityInterval() =default;
+
     VisibilityInterval(TVG_TIME _start, TVG_TIME _end, std::vector<double> t): start(_start), end(_end), transmittance(std::move(t)) {
 
         througput =  std::accumulate(transmittance.begin(),transmittance.end(),0.0);

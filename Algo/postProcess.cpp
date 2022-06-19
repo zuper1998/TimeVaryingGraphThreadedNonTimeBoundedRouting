@@ -52,8 +52,16 @@ void postProcess::writeToFile(const std::filesystem::directory_entry &f, GraphDa
     std::ofstream outGeoData(outputGeoData.str(), std::ios_base::out);
 
     for (auto &d_node: destinations) {
+        std::stringstream outputFileData;
 
-        double sum = data.getBestForNode(start->getName(), d_node->getName())*DefValues::EntangledRate;
+        outputFileData  << R"(../Outputs/)" << get_stem(f)  <<  R"(/Data/)";
+        std::filesystem::create_directories(outputFileData.str());
+        outputFileData << start->getName().c_str() << d_node->getName().c_str() << ".txt";
+        std::ofstream outData(outputFileData.str(),std::ios_base::out);
+
+
+
+        double sum = data.getBestForNode(start->getName(), d_node->getName(), outData) * DefValues::EntangledRate;
 
         printf("For the path between %s and %s avarage bitrate was %f sent bits: %f\n", start->getName().c_str(),
                d_node->getName().c_str(), sum / (3600 * 4), sum);

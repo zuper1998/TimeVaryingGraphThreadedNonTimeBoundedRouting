@@ -60,32 +60,33 @@ public:
         }
     }
 
+
     /*
-     * Used vals are edges that are already used up
+     *  Get best edge that is not already used
      */
-    std::tuple<std::string, double> getThroughput(std::vector<std::string> const &used_vals, std::string const& destination) {
-        std::tuple<std::string, double> ret = {"",0};
+    std::tuple<std::string,IntervalPath,Path> getEdge(std::vector<std::string> const &used_vals, std::string const& destination){
+        std::tuple<std::string,IntervalPath,Path> ret;
         for(auto const& [key,val]: data_edge){
-            if(destinationCheck(used_vals, destination, key)) continue;
+            if(!destinationCheck(used_vals, destination, key)) continue;
             auto[i_path,path] = val;
             double tr = i_path.getThrougput();
-            if(std::get<1>(ret)<tr){
+            if(std::get<1>(ret).getThrougput() < tr){
                 std::string e_name = path.visitedInOrder.back()->getName() + Utility::EdgeToStr(i_path.intervals.back());
-                ret = {name,tr};
+                ret = {name,i_path,path};
             }
 
         }
 
         return ret;
-
     }
+
 
     [[nodiscard]] static bool
     destinationCheck(const std::vector<std::string> &used_vals, const std::string &destination,
                      const std::string &key) {
-        bool is_already_used = std::find(used_vals.begin(), used_vals.end(), key) != used_vals.end();
+        bool is_not_used = std::find(used_vals.begin(), used_vals.end(), key) == used_vals.end();
         bool is_dest = key.find(destination) != std::string::npos;
-        return is_already_used || is_dest;
+        return is_not_used && is_dest;
     }
 
     size_t getMemoryUsage(){

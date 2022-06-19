@@ -30,7 +30,7 @@ public:
     void addPath(const IntervalPath &, Path const &);
 
 
-    double getBestForNode(std::string const &edge_name, const std::string& destination);
+    double getBestForNode(std::string const &edge_name, const std::string &destination, std::ostream &dataFile);
 
     void concat(const GraphDataStruct &aStruct);
 
