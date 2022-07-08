@@ -1,0 +1,7 @@
+Copenhagen|251.364
+Rome|232.227
+Vienna|242.794
+Helsinki|218.341
+Berlin|259.169
+Budapest|233.134
+|300.616

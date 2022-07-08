@@ -1,4 +1,5 @@
 #pragma once
+#define test
 namespace DefValues {
 	/// <summary>
 	/// Max window in seconds

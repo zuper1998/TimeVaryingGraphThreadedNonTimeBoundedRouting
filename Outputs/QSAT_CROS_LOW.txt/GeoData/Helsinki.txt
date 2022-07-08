@@ -1,7 +1,7 @@
-Berlin|0.00403978
-Budapest|0.00419294
-Copenhagen|0.00419294
-Rome|0.0035146
-Vienna|0.00419294
-Paris|0.0035146
-|0
+Berlin|101.595
+Budapest|87.7998
+Copenhagen|101.257
+Rome|63.5918
+Vienna|88.5746
+Paris|95.9591
+|107.629

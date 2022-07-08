@@ -1,7 +1,7 @@
-Berlin|0.00528331
-Budapest|0.0043035
-Copenhagen|0.0039771
-Vienna|0.00585072
-Helsinki|0.0047406
-Paris|0.005308
-|0
+Berlin|101.902
+Budapest|105.714
+Copenhagen|98.1809
+Vienna|103.873
+Helsinki|76.6904
+Paris|101.765
+|107.533

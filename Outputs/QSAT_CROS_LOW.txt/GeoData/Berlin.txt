@@ -1,7 +1,7 @@
-Budapest|8.79494
-Copenhagen|27.3836
-Rome|7.71923
-Vienna|12.3035
-Helsinki|10.5449
-Paris|22.018
-|27.8439
+Budapest|111.796
+Copenhagen|119.547
+Rome|93.8182
+Vienna|111.872
+Helsinki|112.07
+Paris|108.586
+|157.803

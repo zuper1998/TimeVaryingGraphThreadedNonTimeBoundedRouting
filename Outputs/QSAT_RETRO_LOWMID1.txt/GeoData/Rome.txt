@@ -1,0 +1,7 @@
+Copenhagen|213.87
+Vienna|234.14
+Helsinki|172.43
+Berlin|223.508
+Budapest|232.856
+Paris|229.413
+|253.715
