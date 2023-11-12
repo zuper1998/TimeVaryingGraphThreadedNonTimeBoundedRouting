@@ -15,9 +15,10 @@ namespace DefValues {
     const size_t maxSimPaths = 100000;
 #endif
 #ifdef test
-    static size_t queue_max_size = 15000;
+    static std::size_t queue_max_size = 15000;
     const bool isTest = true;
-    const size_t maxSimPaths = 10000;
+    const std::size_t maxSimPaths = 10000;
+
 #endif
 
 
